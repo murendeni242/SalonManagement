@@ -188,7 +188,6 @@ using (var scope = app.Services.CreateScope())
     // Only seed if the Users table is completely empty
     if (!db.Users.Any())
     {
-        // ⚠️  CHANGE THIS PASSWORD before going to production
         db.Users.Add(new User(
             email: "owner@salon.com",
             passwordHash: hasher.Hash("ChangeMe123!"),
