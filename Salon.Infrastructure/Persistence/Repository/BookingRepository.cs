@@ -90,6 +90,13 @@ public class BookingRepository : IBookingRepository
     }
 
     /// <inheritdoc />
+    public async Task DeleteAsync(Booking booking)
+    {
+        _context.Bookings.Remove(booking);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <inheritdoc />
     public async Task<IEnumerable<Booking>> GetByDateRangeAsync(DateTime from, DateTime to)
     => await _context.Bookings
         .Where(b => b.BookingDate >= from && b.BookingDate <= to)

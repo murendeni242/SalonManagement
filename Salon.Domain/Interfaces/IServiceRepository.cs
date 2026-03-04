@@ -1,4 +1,5 @@
-﻿using Salon.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Salon.Domain.Entities;
 
 namespace Salon.Domain.Interfaces;
 
@@ -23,5 +24,8 @@ public interface IServiceRepository
     Task<IEnumerable<Service>> GetAllAsync();
 
     /// <summary>Saves changes to an existing service.</summary>
-    Task UpdateAsync(Service service);  // ✅ NEW
+    Task UpdateAsync(Service service);
+
+    /// <summary>Soft delete to an existing service.</summary>
+    Task DeleteAsync(Service service);
 }

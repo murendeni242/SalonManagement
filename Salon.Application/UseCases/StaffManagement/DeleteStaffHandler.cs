@@ -36,8 +36,7 @@ public class DeleteStaffHandler
         var staff = await _staffRepository.GetByIdAsync(staffId)
             ?? throw new NotFoundException("Staff", staffId);
 
-        staff.SoftDelete();
-        await _staffRepository.UpdateAsync(staff);
+        await _staffRepository.DeleteAsync(staff);
 
         await _auditLog.AddAsync(new AuditLog(
             entityName: "Staff",

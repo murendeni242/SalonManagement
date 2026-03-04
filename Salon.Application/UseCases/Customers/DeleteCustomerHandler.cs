@@ -36,8 +36,7 @@ public class DeleteCustomerHandler
         var customer = await _customerRepository.GetByIdAsync(customerId)
             ?? throw new NotFoundException("Customer", customerId);
 
-        customer.SoftDelete();
-        await _customerRepository.UpdateAsync(customer);
+        await _customerRepository.DeleteAsync(customer);
 
         await _auditLog.AddAsync(new AuditLog(
             entityName: "Customer",

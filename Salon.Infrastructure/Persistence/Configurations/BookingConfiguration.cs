@@ -6,11 +6,6 @@ namespace Salon.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// EF Core configuration for the Booking entity.
-///
-/// Key additions over your original:
-/// - Global query filter: WHERE IsDeleted = 0 is automatically appended to
-///   every LINQ query. Call .IgnoreQueryFilters() when you need deleted rows.
-/// - Composite index on (StaffId, BookingDate, IsDeleted) speeds up the overlap check.
 /// </summary>
 public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 {
@@ -18,16 +13,24 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
     {
         builder.HasKey(b => b.Id);
 
+        // ── Core booking fields ────────────────────────────────────
         builder.Property(b => b.TotalPrice).HasPrecision(18, 2).IsRequired();
         builder.Property(b => b.BookingDate).IsRequired();
         builder.Property(b => b.StartTime).IsRequired();
         builder.Property(b => b.EndTime).IsRequired();
-        builder.Property(b => b.Status).IsRequired();
+        builder.Property(b => b.Status).IsRequired().HasConversion<string>();
         builder.Property(b => b.Notes).HasMaxLength(500);
 
-        // Soft-delete global query filter — every query gets WHERE IsDeleted = 0 for free
-        builder.HasQueryFilter(b => !b.IsDeleted);
+        // ── Audit fields (from AuditableEntity) ───────────────────
+        builder.Property(b => b.CreatedAt).IsRequired();
+        builder.Property(b => b.CreatedBy).IsRequired().HasMaxLength(256);
+        builder.Property(b => b.UpdatedAt).IsRequired(false);
+        builder.Property(b => b.UpdatedBy).IsRequired(false).HasMaxLength(256);
+        builder.Property(b => b.DeletedBy).IsRequired(false).HasMaxLength(256);
+        builder.Property(b => b.DeletedAt).IsRequired(false);
+        builder.Property(b => b.IsDeleted).IsRequired().HasDefaultValue(false);
 
+        // ── Indexes ────────────────────────────────────────────────
         // Speeds up the overlap detection query in BookingRepository
         builder.HasIndex(b => new { b.StaffId, b.BookingDate, b.IsDeleted });
     }

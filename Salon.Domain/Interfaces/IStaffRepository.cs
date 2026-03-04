@@ -1,4 +1,5 @@
-﻿using Salon.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Salon.Domain.Entities;
 
 namespace Salon.Domain.Interfaces;
 
@@ -27,7 +28,7 @@ public interface IStaffRepository
     /// Returns a staff member by their email address, or null if not found.
     /// Used to link a Staff profile to a User login account on the schedule endpoint.
     /// </summary>
-    Task<Staff?> GetByEmailAsync(string email);              // ✅ NEW
+    Task<Staff?> GetByEmailAsync(string email);             
 
     /// <summary>
     /// Returns all non-cancelled bookings assigned to a staff member on a specific date,
@@ -36,8 +37,11 @@ public interface IStaffRepository
     /// </summary>
     /// <param name="staffId">Primary key of the staff member.</param>
     /// <param name="date">The calendar date to fetch the schedule for.</param>
-    Task<IEnumerable<Booking>> GetScheduleAsync(int staffId, DateTime date); // ✅ NEW
+    Task<IEnumerable<Booking>> GetScheduleAsync(int staffId, DateTime date); 
 
     /// <summary>Saves changes to an existing staff record.</summary>
-    Task UpdateAsync(Staff staff);                           // ✅ NEW
+    Task UpdateAsync(Staff staff);
+
+    /// <summary>Soft delete to an existing staff.</summary>
+    Task DeleteAsync(Staff staff);
 }

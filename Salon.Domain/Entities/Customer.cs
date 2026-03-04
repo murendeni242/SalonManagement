@@ -5,27 +5,8 @@ namespace Salon.Domain.Entities;
 /// <summary>
 /// Represents a salon customer — the central entity of the whole system.
 /// Every booking and every payment traces back to a customer record.
-///
-/// Key design decisions for this salon system:
-///
-/// 1. SOFT DELETE — same pattern as Staff and Service. Customer records must
-///    never be hard-deleted because their bookings and payments exist in the database.
-///    Deleting the customer would orphan those records.
-///
-/// 2. NOTES — salons keep important client-specific information:
-///    allergies, colour formulas, product preferences, medical notes.
-///    A plain text field is flexible enough and avoids over-engineering.
-///
-/// 3. EMAIL is optional — walk-in customers often don't provide one.
-///    When provided it must be unique so it can be used as a lookup key.
-///
-/// 4. PHONE is the primary lookup field at reception — "what's your number?"
-///    is how 90% of salon check-ins work.
-///
-/// 5. DATE OF BIRTH is optional — useful for birthday promotions and
-///    verifying customer identity when they call.
 /// </summary>
-public class Customer
+public class Customer : AuditableEntity
 {
     // ── Identity ──────────────────────────────────────────────────────
 
@@ -74,17 +55,6 @@ public class Customer
     /// Used for "lapsed customer" reports (not visited in 90+ days).
     /// </summary>
     public DateTime? LastVisitAt { get; private set; }
-
-    // ── Status + soft delete ──────────────────────────────────────────
-
-    /// <summary>
-    /// True when this customer record has been soft-deleted.
-    /// Hidden from normal queries but kept so historical bookings are never orphaned.
-    /// </summary>
-    public bool IsDeleted { get; private set; }
-
-    /// <summary>UTC timestamp of the soft-delete, or null if still active.</summary>
-    public DateTime? DeletedAt { get; private set; }
 
     // ── EF Core ───────────────────────────────────────────────────────
 
@@ -174,19 +144,6 @@ public class Customer
     {
         if (LastVisitAt == null || visitedAt > LastVisitAt)
             LastVisitAt = visitedAt;
-    }
-
-    /// <summary>
-    /// Soft-deletes this customer record. The row stays in the database so
-    /// historical bookings and sales are never orphaned.
-    /// </summary>
-    /// <exception cref="DomainException">Thrown when already deleted.</exception>
-    public void SoftDelete()
-    {
-        if (IsDeleted)
-            throw new DomainException("This customer record has already been deleted.");
-        IsDeleted = true;
-        DeletedAt = DateTime.UtcNow;
     }
 
     // ── Computed properties ───────────────────────────────────────────

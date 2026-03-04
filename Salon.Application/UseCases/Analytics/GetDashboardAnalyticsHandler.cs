@@ -121,8 +121,8 @@ public class GetDashboardAnalyticsHandler
         var completed = bookings.Count(b => b.Status == BookingStatus.Completed);
 
         // New customers = those whose CreatedAt falls within the period
-        //var newCustomers = customers.Count(c =>
-        //    c.CreatedAt >= fromDate && c.CreatedAt <= toDate);
+        var newCustomers = customers.Count(c =>
+            c.CreatedAt >= fromDate && c.CreatedAt <= toDate);
 
         return new DashboardAnalyticsDto
         {
@@ -135,7 +135,7 @@ public class GetDashboardAnalyticsHandler
             {
                 TotalRevenue = totalRevenue,
                 TotalBookings = totalBookings,
-                //NewCustomers = newCustomers,
+                NewCustomers = newCustomers,
                 AvgBookingValue = totalBookings > 0
                     ? Math.Round(totalRevenue / totalBookings, 2)
                     : 0,
