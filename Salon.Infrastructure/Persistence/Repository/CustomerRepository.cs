@@ -94,6 +94,13 @@ public class CustomerRepository : ICustomerRepository
     }
 
     /// <inheritdoc />
+    public async Task DeleteAsync(Customer customer)
+    {
+        _context.Customers.Remove(customer);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <inheritdoc />
     public async Task<IEnumerable<Customer>> GetAllAsync()
         => await _context.Customers
             .AsNoTracking()

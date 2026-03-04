@@ -44,5 +44,8 @@ public interface IBookingRepository
     /// <summary>Saves changes to an existing booking.</summary>
     Task UpdateAsync(Booking booking);
 
+    /// <summary>Soft delete to an existing booking.</summary>
+    Task DeleteAsync(Booking booking);
+
     Task<IEnumerable<Booking>> GetByDateRangeAsync(DateTime from, DateTime to);
 }

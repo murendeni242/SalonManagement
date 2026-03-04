@@ -38,16 +38,19 @@ public interface ICustomerRepository
     /// Returns a customer by their email address, or null if not found.
     /// Used to prevent duplicate registrations.
     /// </summary>
-    Task<Customer?> GetByEmailAsync(string email);                // ✅ NEW
+    Task<Customer?> GetByEmailAsync(string email);                
 
     /// <summary>
     /// Returns a customer by their phone number, or null if not found.
     /// Used to check for duplicates before creating a new customer.
     /// </summary>
-    Task<Customer?> GetByPhoneAsync(string phone);                // ✅ NEW
+    Task<Customer?> GetByPhoneAsync(string phone);                
 
     /// <summary>Saves changes to an existing customer record.</summary>
-    Task UpdateAsync(Customer customer);                          // ✅ NEW
+    Task UpdateAsync(Customer customer);
+
+    /// <summary>Soft delete to an existing booking.</summary>
+    Task DeleteAsync(Customer customer);
 
     Task<IEnumerable<Customer>> GetAllAsync();
 }

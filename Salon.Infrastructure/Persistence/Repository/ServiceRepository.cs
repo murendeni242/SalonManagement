@@ -53,4 +53,11 @@ public class ServiceRepository : IServiceRepository
         _context.Services.Update(service);
         await _context.SaveChangesAsync();
     }
+
+    /// <inheritdoc />
+    public async Task DeleteAsync(Service service)
+    {
+        _context.Services.Remove(service);
+        await _context.SaveChangesAsync();
+    }
 }

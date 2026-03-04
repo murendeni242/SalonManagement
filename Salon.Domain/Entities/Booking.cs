@@ -7,7 +7,7 @@ namespace Salon.Domain.Entities;
 /// Core booking aggregate. Every business rule for a booking lives here.
 /// No outside layer can put the booking into an invalid state.
 /// </summary>
-public class Booking
+public class Booking : AuditableEntity
 {
     /// <summary>Database primary key.</summary>
     public int Id { get; private set; }
@@ -41,12 +41,6 @@ public class Booking
 
     /// <summary>Optional free-text notes. Maximum 500 characters.</summary>
     public string? Notes { get; private set; }
-
-    /// <summary>True when the booking has been soft-deleted.</summary>
-    public bool IsDeleted { get; private set; }
-
-    /// <summary>UTC timestamp of the soft-delete, or null if not deleted.</summary>
-    public DateTime? DeletedAt { get; private set; }
 
     /// <summary>Required by EF Core. Do not call directly.</summary>
     protected Booking() { }
@@ -135,18 +129,5 @@ public class Booking
         if (Status == BookingStatus.Cancelled)
             throw new DomainException("Booking is already cancelled.");
         Status = BookingStatus.Cancelled;
-    }
-
-    /// <summary>
-    /// Soft-deletes the booking. The row is kept in the database for the audit trail
-    /// but hidden from all normal queries via EF Core global query filter.
-    /// </summary>
-    /// <exception cref="DomainException">Thrown when already deleted.</exception>
-    public void SoftDelete()
-    {
-        if (IsDeleted)
-            throw new DomainException("This booking has already been deleted.");
-        IsDeleted = true;
-        DeletedAt = DateTime.UtcNow;
     }
 }

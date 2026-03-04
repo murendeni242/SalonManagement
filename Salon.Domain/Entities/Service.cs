@@ -6,7 +6,7 @@ namespace Salon.Domain.Entities;
 /// Represents a salon service (e.g. Haircut, Colour, Treatment).
 /// All business rules live here — no outside layer can put this into a bad state.
 /// </summary>
-public class Service
+public class Service : AuditableEntity
 {
     /// <summary>Database primary key.</summary>
     public int Id { get; private set; }
@@ -25,16 +25,6 @@ public class Service
 
     /// <summary>Active or Inactive. Inactive services cannot be booked.</summary>
     public string Status { get; private set; } = "Active";
-
-    /// <summary>
-    /// True when this service has been soft-deleted.
-    /// Soft-deleted services are hidden from normal queries but kept in the
-    /// database so the audit trail and historical bookings are never broken.
-    /// </summary>
-    public bool IsDeleted { get; private set; }
-
-    /// <summary>UTC timestamp of the soft-delete, or null if not deleted.</summary>
-    public DateTime? DeletedAt { get; private set; }
 
     /// <summary>Required by EF Core. Do not call directly.</summary>
     protected Service() { }
@@ -100,18 +90,5 @@ public class Service
         if (status != "Active" && status != "Inactive")
             throw new DomainException("Status must be Active or Inactive.");
         Status = status;
-    }
-
-    /// <summary>
-    /// Soft-deletes the service. The row stays in the database so historical
-    /// bookings and the audit trail are never broken.
-    /// </summary>
-    /// <exception cref="DomainException">Thrown when the service is already deleted.</exception>
-    public void SoftDelete()
-    {
-        if (IsDeleted)
-            throw new DomainException("This service has already been deleted.");
-        IsDeleted = true;
-        DeletedAt = DateTime.UtcNow;
     }
 }

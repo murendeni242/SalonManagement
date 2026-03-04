@@ -35,8 +35,7 @@ public class DeleteBookingHandler
         var booking = await _bookingRepository.GetByIdAsync(bookingId)
             ?? throw new NotFoundException("Booking", bookingId);
 
-        booking.SoftDelete();
-        await _bookingRepository.UpdateAsync(booking);
+        await _bookingRepository.DeleteAsync(booking);
 
         await _auditLog.AddAsync(new AuditLog(
             entityName: "Booking",

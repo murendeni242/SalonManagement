@@ -4,27 +4,8 @@ namespace Salon.Domain.Entities;
 
 /// <summary>
 /// Represents a salon employee who performs services and is assigned to bookings.
-///
-/// Key design decisions for this salon system:
-///
-/// 1. SALON ROLE vs SYSTEM ROLE — these are two different things.
-///    Staff.Role = the employee's JOB TITLE: Stylist | Colourist | Therapist | Manager | Receptionist.
-///    User.Role  = their SYSTEM ACCESS LEVEL: Owner | Reception | Staff.
-///    One person can be a "Stylist" (Staff.Role) with "Staff" system access (User.Role).
-///    They are linked by matching email address.
-///
-/// 2. SPECIALISATIONS — a staff member has a set of service IDs they are qualified to perform.
-///    A Colourist shouldn't be assigned to a massage booking.
-///    Stored as a comma-separated string of service IDs (e.g. "1,3,7") — simple and queryable.
-///    An empty Specialisations field means they can perform ALL services.
-///
-/// 3. SOFT DELETE — same pattern as Service. Historical bookings must never lose their
-///    staff reference. IsDeleted excluded via EF Core global query filter.
-///
-/// 4. EMAIL is optional — not all staff need system login access — but must be
-///    unique when provided, so it can safely link to a User account.
 /// </summary>
-public class Staff
+public class Staff : AuditableEntity
 {
     // ── Identity ──────────────────────────────────────────────────────
 
@@ -75,16 +56,6 @@ public class Staff
     /// Inactive staff are not shown in booking forms and cannot be assigned to new appointments.
     /// </summary>
     public string Status { get; private set; } = "Active";
-
-    /// <summary>
-    /// True when this record has been soft-deleted by the Owner.
-    /// Soft-deleted staff are hidden from all normal queries via EF Core global filter.
-    /// The row is kept so historical bookings and the audit trail are never broken.
-    /// </summary>
-    public bool IsDeleted { get; private set; }
-
-    /// <summary>UTC timestamp of the soft-delete, or null if still active.</summary>
-    public DateTime? DeletedAt { get; private set; }
 
     // ── EF Core ───────────────────────────────────────────────────────
 
@@ -199,19 +170,6 @@ public class Staff
         if (status != "Active" && status != "Inactive")
             throw new DomainException("Status must be Active or Inactive.");
         Status = status;
-    }
-
-    /// <summary>
-    /// Soft-deletes this staff record. The row stays in the database so historical
-    /// bookings and the audit trail are never lost.
-    /// </summary>
-    /// <exception cref="DomainException">Thrown when already deleted.</exception>
-    public void SoftDelete()
-    {
-        if (IsDeleted)
-            throw new DomainException("This staff record has already been deleted.");
-        IsDeleted = true;
-        DeletedAt = DateTime.UtcNow;
     }
 
     // ── Computed properties ───────────────────────────────────────────

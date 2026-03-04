@@ -7,25 +7,8 @@ namespace Salon.Domain.Entities;
 /// Represents a single payment transaction linked to a salon booking.
 ///
 /// Key design decisions for this salon system:
-///
-/// 1. A booking can have MORE than one sale record.
-///    Reason: customers sometimes pay a deposit upfront, then the balance on the day.
-///    Both payments link to the same BookingId.
-///
-/// 2. Refunds create a NEW Sale record with a negative AmountPaid.
-///    The original sale is marked Refunded but never modified.
-///    Reason: clean financial paper trail — nothing is ever overwritten.
-///
-/// 3. Void is for erroneous data entry (wrong amount typed, wrong booking).
-///    It does NOT mean money was returned. Owner only.
-///
-/// 4. Valid payment methods: Cash | Card | EFT | Voucher.
-///    Enforced in the domain so unrecognised methods cannot enter the system.
-///
-/// 5. ProcessedByStaffId records who took the payment — useful for commission
-///    reporting and end-of-day accountability.
 /// </summary>
-public class Sale
+public class Sale : AuditableEntity
 {
     // ── Identity ──────────────────────────────────────────────────────
 

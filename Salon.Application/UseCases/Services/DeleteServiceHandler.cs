@@ -36,8 +36,7 @@ public class DeleteServiceHandler
         var service = await _serviceRepository.GetByIdAsync(serviceId)
             ?? throw new NotFoundException("Service", serviceId);
 
-        service.SoftDelete();
-        await _serviceRepository.UpdateAsync(service);
+        await _serviceRepository.DeleteAsync(service);
 
         await _auditLog.AddAsync(new AuditLog(
             entityName: "Service",

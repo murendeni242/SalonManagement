@@ -8,15 +8,6 @@ namespace Salon.Infrastructure.Repositories;
 
 /// <summary>
 /// EF Core implementation of IStaffRepository.
-///
-/// Extends your original with:
-/// - IgnoreQueryFilters() on GetByIdAsync so soft-deleted records are still loadable.
-/// - GetByEmailAsync for linking a Staff profile to a User login account.
-/// - GetScheduleAsync for the daily schedule / calendar view.
-/// - UpdateAsync for saving changes after Update(), SetStatus(), or SoftDelete().
-///
-/// The global query filter in StaffConfiguration automatically excludes soft-deleted
-/// records from GetAllAsync without any extra code.
 /// </summary>
 public class StaffRepository : IStaffRepository
 {
@@ -78,6 +69,13 @@ public class StaffRepository : IStaffRepository
     public async Task UpdateAsync(Staff staff)
     {
         _context.Staff.Update(staff);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteAsync(Staff staff)
+    {
+        _context.Staff.Remove(staff);
         await _context.SaveChangesAsync();
     }
 }
