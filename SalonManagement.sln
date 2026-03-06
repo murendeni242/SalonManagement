@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Salon.Domain", "Salon.Domain\Salon.Domain.csproj", "{C1776991-526D-44A1-91C3-11C60E00AB18}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Salon.Infrastructure", "Salon.Infrastructure\Salon.Infrastructure.csproj", "{9D8023A7-AA48-44BF-9D25-6E3BE730DA55}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Salon.API", "Salon.API\Salon.API.csproj", "{0657AC69-652E-4251-A523-138ADC1E4D5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Salon.Tests", "Salon.Tests\Salon.Tests.csproj", "{251B073D-504F-44EA-BBFD-0FF57B284C03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{0657AC69-652E-4251-A523-138ADC1E4D5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0657AC69-652E-4251-A523-138ADC1E4D5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0657AC69-652E-4251-A523-138ADC1E4D5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{251B073D-504F-44EA-BBFD-0FF57B284C03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{251B073D-504F-44EA-BBFD-0FF57B284C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{251B073D-504F-44EA-BBFD-0FF57B284C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{251B073D-504F-44EA-BBFD-0FF57B284C03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
