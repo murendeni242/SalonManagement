@@ -31,8 +31,6 @@
     <Folder Include="Customers\GetAllCustomersHandlerTests\Failure Cases\" />
     <Folder Include="Services\GetServicesHandlerTests\Failure Cases\" />
     <Folder Include="Sales\GetSalesHandlerTests\Failure Cases\" />
-    <Folder Include="StaffManagement\CreateUserHandlerTests - Copy %282%29\Failure Cases\" />
-    <Folder Include="StaffManagement\CreateUserHandlerTests - Copy %282%29\Success Cases\" />
     <Folder Include="StaffManagement\GetStaffHandlerTests\Failure Cases\" />
   </ItemGroup>
 
