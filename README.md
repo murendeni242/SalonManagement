@@ -1,4 +1,4 @@
-# 💇‍♀️ SalonSystem
+# SalonSystem
 
 A full-stack salon management platform built with **ASP.NET Core 8 (Clean Architecture)** and **React 18 + TypeScript**.
 
@@ -8,7 +8,7 @@ Enables salon owners to manage bookings, customers, staff, services, sales, and 
 
 ---
 
-## 📷 Screenshots
+## Screenshots
 
 ### Dashboard — Analytics & Revenue Overview
 ![Dashboard](docs/images/dashboard.png)
@@ -40,7 +40,7 @@ Enables salon owners to manage bookings, customers, staff, services, sales, and 
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 ### Backend
 - ASP.NET Core 8
@@ -63,7 +63,7 @@ Enables salon owners to manage bookings, customers, staff, services, sales, and 
 
 ---
 
-## ✅ Implemented Features
+## Implemented Features
 
 ### Authentication & Security
 - Role-based access control (Owner, Reception, Staff)
@@ -125,7 +125,7 @@ Enables salon owners to manage bookings, customers, staff, services, sales, and 
 
 ---
 
-## 🏗 Architecture Overview
+## Architecture Overview
 
 The backend follows Clean Architecture — each layer depends only on the layer inside it:
 
@@ -153,7 +153,7 @@ Business rules live inside domain methods — `booking.Complete()` enforces that
 
 ---
 
-## 🔐 Authentication Flow
+## Authentication Flow
 
 1. User logs in via `POST /api/auth/login`
 2. Backend verifies password using `BCrypt.Verify()`
@@ -165,7 +165,7 @@ Business rules live inside domain methods — `booking.Complete()` enforces that
 
 ---
 
-## ▶️ Running Locally
+## Running Locally
 
 ### Prerequisites
 - .NET 8 SDK
@@ -203,7 +203,7 @@ Frontend: `http://localhost:5173`
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 dotnet test
@@ -221,21 +221,21 @@ var booking = new BookingBuilder()
 
 ---
 
-## 🚀 Engineering Roadmap
+## Engineering Roadmap
 
-### 🔴 High Priority
+### High Priority
 - **Double-booking prevention** — interval overlap validation per staff member
 - **Staff working hours** — configurable availability per day of week
 - **Buffer time between appointments**
 - Integration tests (xUnit + EF Core InMemory)
 
-### 🟡 Medium Priority
+### Medium Priority
 - Commission engine (percentage, fixed, tiered strategies)
 - Staff commission reporting
 - Exportable PDF / Excel financial reports
 - Daily reconciliation
 
-### 🟢 Lower Priority
+### Lower Priority
 - Multi-branch support
 - Domain events (`SaleRecorded`, `BookingCompleted`)
 - Caching for analytics endpoints
@@ -244,19 +244,19 @@ var booking = new BookingBuilder()
 
 ---
 
-## 🚧 Project Status
+## Project Status
 
 Core system is feature-complete and actively being hardened — double-booking prevention, staff availability, and the commission engine are next.
 
 ---
 
-## 📄 License
+## License
 
 MIT License
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Murendeni Mulaudzi**
 Full-Stack .NET Developer · Johannesburg, South Africa
