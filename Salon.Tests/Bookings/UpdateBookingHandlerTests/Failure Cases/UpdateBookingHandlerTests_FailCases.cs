@@ -13,12 +13,15 @@ namespace Salon.Tests.Bookings.UpdateBookingHandlerTests.Failure_Cases
         // ── Shared setup ──────────────────────────────────────────────
         private readonly Mock<IBookingRepository> _bookingRepo = new();
         private readonly Mock<IServiceRepository> _serviceRepo = new();
+        private readonly Mock<IStaffScheduleRepository> _scheduleRepo = new();
         private readonly Mock<IAuditLogRepository> _auditLog = new();
         private readonly Mock<ICurrentUserService> _currentUser = new();
         private readonly UpdateBookingHandler _handler;
 
         private readonly Service _service;
         private readonly Booking _booking;
+
+        // BookingDate is a Monday — matches the default schedule below
         private static readonly DateTime BookingDate = new(2026, 6, 15);
 
         public UpdateBookingHandlerTests_FailCases()
@@ -46,11 +49,23 @@ namespace Salon.Tests.Bookings.UpdateBookingHandlerTests.Failure_Cases
                 .Setup(r => r.GetByIdAsync(5))
                 .ReturnsAsync(_booking);
 
+            // Default — staff works Monday 08:00–18:00 (covers all test slots)
+            var defaultSchedule = new StaffSchedule(
+                staffId: 2,
+                dayOfWeek: DayOfWeek.Monday,
+                startTime: new TimeSpan(8, 0, 0),
+                endTime: new TimeSpan(18, 0, 0));
+
+            _scheduleRepo
+                .Setup(r => r.GetByStaffIdAndDayAsync(2, DayOfWeek.Monday))
+                .ReturnsAsync(defaultSchedule);
+
             _handler = new UpdateBookingHandler(
                 _bookingRepo.Object,
                 _serviceRepo.Object,
                 _auditLog.Object,
-                _currentUser.Object);
+                _currentUser.Object,
+                _scheduleRepo.Object);
         }
 
         // ── Overlap with a different booking ──────────────────────────

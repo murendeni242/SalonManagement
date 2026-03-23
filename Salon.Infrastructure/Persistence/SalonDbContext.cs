@@ -26,6 +26,7 @@ public class SalonDbContext : DbContext
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Sale> Sales => Set<Sale>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<StaffSchedule> StaffSchedules { get; set; }
 
     /// <summary>
     /// Shared audit log table. One table for the whole system.
