@@ -16,17 +16,20 @@ public class UpdateBookingHandler
     private readonly IServiceRepository _serviceRepository;
     private readonly IAuditLogRepository _auditLog;
     private readonly ICurrentUserService _currentUser;
+    private readonly IStaffScheduleRepository _scheduleRepository;
 
     public UpdateBookingHandler(
         IBookingRepository bookingRepository,
         IServiceRepository serviceRepository,
         IAuditLogRepository auditLog,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IStaffScheduleRepository scheduleRepository)
     {
         _bookingRepository = bookingRepository;
         _serviceRepository = serviceRepository;
         _auditLog = auditLog;
         _currentUser = currentUser;
+        _scheduleRepository = scheduleRepository;
     }
 
     /// <summary>
@@ -46,6 +49,19 @@ public class UpdateBookingHandler
             ?? throw new NotFoundException("Service", command.ServiceId);
 
         var endTime = command.StartTime.Add(TimeSpan.FromMinutes(service.DurationMinutes));
+
+        var dayOfWeek = command.BookingDate.DayOfWeek;
+
+        var schedule = await _scheduleRepository
+            .GetByStaffIdAndDayAsync(command.StaffId, dayOfWeek);
+
+        if (schedule is null)
+            throw new DomainException($"Staff member is not available on {dayOfWeek}s.");
+
+        if (!schedule.CoversWindow(command.StartTime, endTime))
+            throw new DomainException(
+                $"Booking time {command.StartTime:hh\\:mm}–{endTime:hh\\:mm} falls outside " +
+                $"working hours ({schedule.StartTime:hh\\:mm}–{schedule.EndTime:hh\\:mm}).");
 
         // Exclude this booking from the overlap check so it doesn't conflict with its own slot
         var overlap = await _bookingRepository.ExistsOverlappingBookingAsync(

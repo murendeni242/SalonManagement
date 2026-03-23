@@ -12,12 +12,13 @@ using Salon.Application.UseCases.Customers;
 using Salon.Application.UseCases.Sales;
 using Salon.Application.UseCases.Services;
 using Salon.Application.UseCases.StaffManagement;
+using Salon.Application.UseCases.StaffSchedules;
 using Salon.Application.UseCases.Users;
 using Salon.Domain.Entities;
 using Salon.Domain.Interfaces;
 using Salon.Infrastructure.Persistence;
 using Salon.Infrastructure.Repositories;
-using Salon.Infrastructure.Services; // ✅ NEW
+using Salon.Infrastructure.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,13 +39,14 @@ builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>(); // ✅ NEW — one registration covers the whole system
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IStaffScheduleRepository, StaffScheduleRepository>();
 
 // -----------------------------
 // 3️⃣ Register Current User Service (reads email from JWT for audit entries)
 // -----------------------------
-builder.Services.AddHttpContextAccessor();                              // ✅ NEW
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>(); // ✅ NEW
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // -----------------------------
 // 4️⃣ Register Handlers / Use Cases
@@ -64,13 +66,11 @@ builder.Services.AddScoped<CreateSaleHandler>();
 builder.Services.AddScoped<GetSalesHandler>();
 builder.Services.AddScoped<RegisterUserHandler>();
 builder.Services.AddScoped<LoginHandler>();
-
-// ── New booking handlers ──────────────────────────────────────────────
-builder.Services.AddScoped<UpdateBookingHandler>();  // ✅ NEW
-builder.Services.AddScoped<ConfirmBookingHandler>(); // ✅ NEW
-builder.Services.AddScoped<CancelBookingHandler>();  // ✅ NEW
-builder.Services.AddScoped<DeleteBookingHandler>();  // ✅ NEW
-builder.Services.AddScoped<GetAuditLogsHandler>();   // ✅ NEW
+builder.Services.AddScoped<UpdateBookingHandler>();
+builder.Services.AddScoped<ConfirmBookingHandler>();
+builder.Services.AddScoped<CancelBookingHandler>();
+builder.Services.AddScoped<DeleteBookingHandler>();
+builder.Services.AddScoped<GetAuditLogsHandler>();
 builder.Services.AddScoped<UpdateServiceHandler>();
 builder.Services.AddScoped<DeleteServiceHandler>();
 builder.Services.AddScoped<GetServiceAuditLogsHandler>();
@@ -91,6 +91,9 @@ builder.Services.AddScoped<SearchCustomersHandler>();
 builder.Services.AddScoped<GetCustomerProfileHandler>();
 builder.Services.AddScoped<GetCustomerAuditLogsHandler>();
 builder.Services.AddScoped<CompleteBookingHandler>();
+builder.Services.AddScoped<GetWeeklyScheduleHandler>();
+builder.Services.AddScoped<UpsertStaffScheduleHandler>();
+builder.Services.AddScoped<DeleteStaffScheduleHandler>();
 
 // User management
 builder.Services.AddScoped<GetUsersHandler>();
@@ -195,7 +198,7 @@ using (var scope = app.Services.CreateScope())
 
         await db.SaveChangesAsync();
 
-        Console.WriteLine("✅ Seed: Owner account created → owner@salon.com / ChangeMe123!");
+        Console.WriteLine("Seed: Owner account created → owner@salon.com / ChangeMe123!");
     }
 }
 
@@ -212,11 +215,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(); // ✅ Must come before UseAuthentication/UseAuthorization
+app.UseCors(); 
 
-app.UseMiddleware<ExceptionMiddleware>(); // Global exception handling
+app.UseMiddleware<ExceptionMiddleware>(); 
 
-app.UseAuthentication(); // 🔥 Must come before UseAuthorization
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();
