@@ -8,6 +8,7 @@ using Salon.Application.UseCases.Analytics;
 using Salon.Application.UseCases.Auth;
 using Salon.Application.UseCases.Auth.Users;
 using Salon.Application.UseCases.Bookings;
+using Salon.Application.UseCases.Commissions;
 using Salon.Application.UseCases.Customers;
 using Salon.Application.UseCases.Sales;
 using Salon.Application.UseCases.Services;
@@ -17,6 +18,7 @@ using Salon.Application.UseCases.Users;
 using Salon.Domain.Entities;
 using Salon.Domain.Interfaces;
 using Salon.Infrastructure.Persistence;
+using Salon.Infrastructure.Persistence.Repository;
 using Salon.Infrastructure.Repositories;
 using Salon.Infrastructure.Services;
 using System.Text;
@@ -41,6 +43,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IStaffScheduleRepository, StaffScheduleRepository>();
+builder.Services.AddScoped<ICommissionRepository, CommissionRepository>();
+builder.Services.AddScoped<ICommissionRuleRepository, CommissionRuleRepository>();
+builder.Services.AddScoped<ICommissionStrategyResolver, CommissionStrategyResolver>();
 
 // -----------------------------
 // 3️⃣ Register Current User Service (reads email from JWT for audit entries)
@@ -94,6 +99,12 @@ builder.Services.AddScoped<CompleteBookingHandler>();
 builder.Services.AddScoped<GetWeeklyScheduleHandler>();
 builder.Services.AddScoped<UpsertStaffScheduleHandler>();
 builder.Services.AddScoped<DeleteStaffScheduleHandler>();
+builder.Services.AddScoped<CalculateCommissionHandler>();
+builder.Services.AddScoped<AdjustCommissionOnRefundHandler>();
+builder.Services.AddScoped<MarkCommissionPaidHandler>();
+builder.Services.AddScoped<GetStaffCommissionsHandler>();
+builder.Services.AddScoped<UpsertCommissionRuleHandler>();
+builder.Services.AddScoped<GetCommissionRulesHandler>();
 
 // User management
 builder.Services.AddScoped<GetUsersHandler>();
@@ -171,7 +182,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:5174",
-                "http://localhost:3000")
+                "http://localhost:3000",
+                "http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -202,6 +214,11 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<SalonDbContext>();
+    await SalonSeeder.SeedAsync(context);
+}
 
 
 // -----------------------------
