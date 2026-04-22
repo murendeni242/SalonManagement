@@ -1,4 +1,5 @@
 ﻿using Salon.Application.DTOs.Sales;
+using Salon.Application.UseCases.Commissions;
 using Salon.Domain.Common;
 using Salon.Domain.Entities;
 using Salon.Domain.Interfaces;
@@ -24,15 +25,18 @@ public class RefundSaleHandler
     private readonly ISaleRepository _saleRepository;
     private readonly IAuditLogRepository _auditLog;
     private readonly ICurrentUserService _currentUser;
+    private readonly AdjustCommissionOnRefundHandler _adjustCommissionHandler;
 
     public RefundSaleHandler(
         ISaleRepository saleRepository,
         IAuditLogRepository auditLog,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        AdjustCommissionOnRefundHandler adjustCommissionHandler)
     {
         _saleRepository = saleRepository;
         _auditLog = auditLog;
         _currentUser = currentUser;
+        _adjustCommissionHandler = adjustCommissionHandler;
     }
 
     /// <summary>
@@ -58,6 +62,13 @@ public class RefundSaleHandler
 
         // Save the new refund record (negative AmountPaid)
         await _saleRepository.AddAsync(refundRecord);
+
+        await _adjustCommissionHandler.Handle(new AdjustCommissionCommand
+        {
+            SaleId = originalSale.Id,
+            OriginalAmount = originalSale.AmountPaid,
+            RefundedAmount = command.RefundAmount
+        });
 
         await _auditLog.AddAsync(new AuditLog(
             entityName: "Sale",

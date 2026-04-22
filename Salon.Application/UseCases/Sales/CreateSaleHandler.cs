@@ -1,4 +1,5 @@
 ﻿using Salon.Application.DTOs.Sales;
+using Salon.Application.UseCases.Commissions;
 using Salon.Domain.Common;
 using Salon.Domain.Entities;
 using Salon.Domain.Enums;
@@ -18,17 +19,20 @@ public class CreateSaleHandler
     private readonly IBookingRepository _bookingRepository;
     private readonly IAuditLogRepository _auditLog;
     private readonly ICurrentUserService _currentUser;
+    private readonly CalculateCommissionHandler _commissionHandler;
 
     public CreateSaleHandler(
         ISaleRepository saleRepository,
         IBookingRepository bookingRepository,
         IAuditLogRepository auditLog,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        CalculateCommissionHandler commissionHandler)
     {
         _saleRepository = saleRepository;
         _bookingRepository = bookingRepository;
         _auditLog = auditLog;
         _currentUser = currentUser;
+        _commissionHandler = commissionHandler;
     }
 
     /// <summary>
@@ -55,6 +59,13 @@ public class CreateSaleHandler
             command.Notes);
 
         await _saleRepository.AddAsync(sale);
+
+        await _commissionHandler.Handle(new CalculateCommissionCommand
+        {
+            SaleId = sale.Id,
+            StaffId = booking.StaffId,
+            PaymentAmount = sale.AmountPaid
+        });
 
         await _auditLog.AddAsync(new AuditLog(
             entityName: "Sale",
