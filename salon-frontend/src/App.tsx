@@ -1,19 +1,20 @@
-// Added: /users (Owner only), /change-password (any logged-in user)
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import Login          from "./auth/Login";
-import RequireAuth    from "./auth/RequireAuth";
+import Login           from "./auth/Login";
+import RequireAuth     from "./auth/RequireAuth";
 import DashboardLayout from "./layout/DashboardLayout";
 
-import Dashboard    from "./pages/Dashboard";
-import Calendar     from "./pages/Calendar";
-import Customers    from "./pages/Customers";
-import Bookings     from "./pages/Bookings";
-import Services     from "./pages/Services";
-import Staff        from "./pages/Staff";
-import Sales        from "./pages/Sales";
-import Users        from "./pages/Users";
-import ChangePassword from "./pages/ChangePassword";
+import Dashboard          from "./pages/Dashboard";
+import Calendar           from "./pages/Calendar";
+import Customers          from "./pages/Customers";
+import Bookings           from "./pages/Bookings";
+import Services           from "./pages/Services";
+import Staff              from "./pages/Staff";
+import Sales              from "./pages/Sales";
+import Users              from "./pages/Users";
+import ChangePassword     from "./pages/ChangePassword";
+import CommissionSettings from "./pages/CommissionSettings";
+import CommissionEarnings from "./pages/CommissionEarnings";
 
 export default function App() {
   return (
@@ -24,7 +25,7 @@ export default function App() {
         {/* Public */}
         <Route path="/login" element={<Login />} />
 
-        {/* Change password — any logged-in user, NO sidebar (standalone page) */}
+        {/* Change password — any logged-in user, NO sidebar */}
         <Route
           path="/change-password"
           element={
@@ -48,7 +49,7 @@ export default function App() {
           </RequireAuth>
         } />
 
-        {/* Bookings — all roles (Staff sees filtered) */}
+        {/* Bookings — all roles */}
         <Route path="/bookings" element={
           <RequireAuth>
             <DashboardLayout><Bookings /></DashboardLayout>
@@ -87,6 +88,20 @@ export default function App() {
         <Route path="/users" element={
           <RequireAuth allowedRoles={["Owner"]}>
             <DashboardLayout><Users /></DashboardLayout>
+          </RequireAuth>
+        } />
+
+        {/* Commission Settings — Owner only */}
+        <Route path="/commissions/settings" element={
+          <RequireAuth allowedRoles={["Owner"]}>
+            <DashboardLayout><CommissionSettings /></DashboardLayout>
+          </RequireAuth>
+        } />
+
+        {/* Commission Earnings — Owner only */}
+        <Route path="/commissions/earnings" element={
+          <RequireAuth allowedRoles={["Owner"]}>
+            <DashboardLayout><CommissionEarnings /></DashboardLayout>
           </RequireAuth>
         } />
 
