@@ -3,16 +3,22 @@ import { useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { getUserEmail } from "../auth/authUtils";
 
+// Add all page titles here — sidebar active state and header title
+// both depend on this map being complete.
 const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/calendar":  "Calendar",
-  "/bookings":  "Bookings",
-  "/customers": "Customers",
-  "/staff":     "Staff",
-  "/services":  "Services",
-  "/sales":     "Sales & Payments",
-  "/users":     "Staff & Roles",
-  "/auditlog":  "Audit Log",
+  "/dashboard":              "Dashboard",
+  "/calendar":               "Calendar",
+  "/bookings":               "Bookings",
+  "/customers":              "Customers",
+  "/staff":                  "Staff",
+  "/services":               "Services",
+  "/sales":                  "Sales & Payments",
+  "/users":                  "Staff & Roles",
+  "/auditlog":               "Audit Log",
+  "/reports":                "Reports & Analytics",
+  // Commission pages
+  "/commissions/settings":   "Commission Settings",
+  "/commissions/earnings":   "Staff Earnings",
 };
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
