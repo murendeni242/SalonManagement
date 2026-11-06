@@ -86,7 +86,6 @@ function weekDays(monday: Date) {
 // Returns all dates in a calendar month grid (always 6 rows × 7 cols)
 function monthGrid(year: number, month: number) {
   const firstDay  = new Date(year, month, 1);
-  const lastDay   = new Date(year, month + 1, 0);
   const startDate = new Date(firstDay);
   const dow = firstDay.getDay();
   startDate.setDate(1 - (dow === 0 ? 6 : dow - 1));

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { commissionService } from "../api/commissionService";
-import type { CommissionSummaryDto, CommissionRuleDto } from "../api/commissionService";
+import type { CommissionRuleDto } from "../api/commissionService";
 
 
 // ── Types ──────────────────────────────────────────────────────────
