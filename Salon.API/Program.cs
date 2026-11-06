@@ -29,7 +29,9 @@ var builder = WebApplication.CreateBuilder(args);
 // 1️⃣ Configure DbContext
 // -----------------------------
 builder.Services.AddDbContext<SalonDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("Default"),
+        sql => sql.EnableRetryOnFailure()));
 
 // -----------------------------
 // 2️⃣ Register Repositories
@@ -175,18 +177,17 @@ builder.Services.AddSwaggerGen(options =>
 // -----------------------------
 // 7️⃣ Configure CORS
 // -----------------------------
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5174", "http://localhost:3000", "http://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy
-            .WithOrigins(
-                "http://localhost:5174",
-                "http://localhost:3000",
-                "http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -200,17 +201,18 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<SalonDbContext>();
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-    // Only seed if the Users table is completely empty
     if (!db.Users.Any())
     {
-        db.Users.Add(new User(
-            email: "owner@salon.com",
-            passwordHash: hasher.Hash("ChangeMe123!"),
-            role: "Owner"));
+        var isDev = app.Environment.IsDevelopment();
+        var ownerEmail = app.Configuration["Seed:OwnerEmail"] ?? (isDev ? "owner@salon.com" : null);
+        var ownerPassword = app.Configuration["Seed:OwnerPassword"] ?? (isDev ? "ChangeMe123!" : null);
 
-        await db.SaveChangesAsync();
-
-        Console.WriteLine("Seed: Owner account created → owner@salon.com / ChangeMe123!");
+        if (!string.IsNullOrWhiteSpace(ownerEmail) && !string.IsNullOrWhiteSpace(ownerPassword))
+        {
+            db.Users.Add(new User(email: ownerEmail, passwordHash: hasher.Hash(ownerPassword), role: "Owner"));
+            await db.SaveChangesAsync();
+            Console.WriteLine($"Seed: Owner account created for {ownerEmail}");
+        }
     }
 }
 
