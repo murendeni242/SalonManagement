@@ -22,7 +22,15 @@ namespace Salon.Tests.Bookings.UpdateBookingHandlerTests.Success_Cases
         private readonly Booking _booking;
 
         // BookingDate is a Monday — matches the default schedule below
-        private static readonly DateTime BookingDate = new(2026, 6, 15);
+        private static readonly DateTime BookingDate = NextMonday();
+
+        private static DateTime NextMonday()
+        {
+            var date = DateTime.Today.AddDays(7);
+            while (date.DayOfWeek != DayOfWeek.Monday)
+                date = date.AddDays(1);
+            return date;
+        }
 
         public UpdateBookingHandlerTests_HappyPath()
         {
