@@ -7,6 +7,7 @@ using Salon.Domain.Entities;
 using Salon.Domain.Enums;
 using Salon.Domain.Interfaces;
 using Salon.Tests.Helpers;
+using Salon.Application.UseCases.Commissions;
 
 namespace Salon.Tests.Sales.CreateSaleHandlerTests.Failure_Cases
 {
@@ -16,6 +17,9 @@ namespace Salon.Tests.Sales.CreateSaleHandlerTests.Failure_Cases
         private readonly Mock<IBookingRepository> _bookingRepo = new();
         private readonly Mock<IAuditLogRepository> _auditLog = new();
         private readonly Mock<ICurrentUserService> _currentUser = new();
+        private readonly Mock<ICommissionRepository> _commissionRepo = new();
+        private readonly Mock<ICommissionRuleRepository> _ruleRepo = new();
+        private readonly Mock<ICommissionStrategyResolver> _resolver = new();
         private readonly CreateSaleHandler _handler;
 
         public CreateSaleHandlerTests_FailureCases()
@@ -24,11 +28,17 @@ namespace Salon.Tests.Sales.CreateSaleHandlerTests.Failure_Cases
                 .Setup(x => x.UserEmail)
                 .Returns("reception@salon.co.za");
 
+            var commissionHandler = new CalculateCommissionHandler(
+                _commissionRepo.Object,
+                _ruleRepo.Object,
+                _resolver.Object);
+
             _handler = new CreateSaleHandler(
                 _saleRepo.Object,
                 _bookingRepo.Object,
                 _auditLog.Object,
-                _currentUser.Object);
+                _currentUser.Object,
+                commissionHandler);
         }
 
         [Fact]
