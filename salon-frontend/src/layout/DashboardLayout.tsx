@@ -51,14 +51,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Sidebar: slides in on phones, always visible from md (768px) up */}
       <div
         className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-200
-          md:static md:z-auto md:translate-x-0
+          md:static md:shrink-0 md:z-auto md:translate-x-0
           ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <Sidebar />
       </div>
 
       {/* Main */}
-      <div className="flex flex-col flex-1 min-w-0">
+      <div className="flex flex-col flex-1 min-w-0 max-w-full">
 
         {/* Top header */}
         <header className="h-[60px] bg-white border-b border-gray-200 px-4 md:px-6 flex items-center justify-between flex-shrink-0 shadow-sm">
@@ -85,7 +85,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto">
           {children}
         </main>
 

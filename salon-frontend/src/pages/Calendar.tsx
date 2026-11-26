@@ -125,15 +125,15 @@ function BookingPopup({
   const canAct      = role === "Owner" || role === "Reception";
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl w-[360px] overflow-hidden"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-[360px] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Header strip */}
         <div className={`${colors.bg} px-5 py-4 flex items-center justify-between`}>
           <div className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${colors.dot}`} />
+            <div className={`w-full max-w-[420px].5 h-2.5 rounded-full ${colors.dot}`} />
             <span className={`text-sm font-bold ${colors.text}`}>{booking.status}</span>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
@@ -513,14 +513,14 @@ export default function Calendar() {
   })();
 
   if (loading) return (
-    <div className="p-6 flex items-center gap-3 text-gray-500">
-      <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+    <div className="p-4 md:p-6 flex items-center gap-3 text-gray-500">
+      <div className="w-full max-w-[500px] h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
       Loading calendar…
     </div>
   );
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
 
       {/* ── Toolbar ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
@@ -611,7 +611,7 @@ export default function Calendar() {
       <div className="flex gap-4 mt-4 flex-wrap">
         {Object.entries(STATUS_COLORS).map(([status, colors]) => (
           <div key={status} className="flex items-center gap-1.5 text-xs text-gray-500">
-            <div className={`w-2.5 h-2.5 rounded-full ${colors.dot}`} />
+            <div className={`w-full max-w-[420px].5 h-2.5 rounded-full ${colors.dot}`} />
             {status}
           </div>
         ))}

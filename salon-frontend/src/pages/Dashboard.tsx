@@ -149,7 +149,7 @@ export default function Dashboard() {
 
   if (role !== "Owner") {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
         <div className="grid grid-cols-2 gap-4 max-w-sm">
           <StatCard label="Bookings Today" value={simpleStats.bookingsToday} color="bg-blue-600" />
@@ -162,14 +162,14 @@ export default function Dashboard() {
   // ── Owner loading / error ──────────────────────────────────────
 
   if (loading) return (
-    <div className="p-6 flex items-center gap-3 text-gray-500">
-      <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+    <div className="p-4 md:p-6 flex items-center gap-3 text-gray-500">
+      <div className="w-full max-w-[500px] h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
       Loading analytics…
     </div>
   );
 
   if (error || !analytics) return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
         {error ?? "No data available."}
       </div>
@@ -181,7 +181,7 @@ export default function Dashboard() {
   // ── Owner full dashboard ───────────────────────────────────────
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
 
       {/* Header + date picker */}
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -289,7 +289,7 @@ export default function Dashboard() {
                   <div key={s.status} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        className="w-full max-w-[420px].5 h-2.5 rounded-full flex-shrink-0"
                         style={{ background: STATUS_COLORS[s.status] ?? "#9ca3af" }}
                       />
                       <span className="text-gray-600">{s.status}</span>

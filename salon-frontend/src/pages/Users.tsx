@@ -1,4 +1,4 @@
-// - List all user accounts with role, status, last login
+// - List all user accounts with role, status, last login (paginated)
 // - Create account → system generates password → shown ONCE in a modal
 // - Reset password → new password shown ONCE
 // - Deactivate / Reactivate account
@@ -7,6 +7,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
+import { usePagination } from "../hooks/usePagination";
+import Pagination from "../components/Pagination";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -52,6 +54,8 @@ export default function Users() {
   const [credEmail,         setCredEmail]         = useState("");
   const [credPassword,      setCredPassword]      = useState("");
   const [credCopied,        setCredCopied]        = useState(false);
+
+  const pager = usePagination(users, 10);
 
   // ── Fetch ────────────────────────────────────────────────────────
 
@@ -159,13 +163,13 @@ export default function Users() {
 
   // ── Render ───────────────────────────────────────────────────────
 
-  if (loading) return <div className="p-6 text-gray-500">Loading users…</div>;
+  if (loading) return <div className="p-4 md:p-6 text-gray-500">Loading users…</div>;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">User Accounts</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -178,115 +182,119 @@ export default function Users() {
             setCreateError(null);
             setCreateOpen(true);
           }}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm flex-shrink-0"
         >
           Create Account
         </button>
       </div>
 
       {/* Users table */}
-      <div className="bg-white rounded shadow overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 border-b text-left">
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Role</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Last Login</th>
-              <th className="py-3 px-4">Created</th>
-              <th className="py-3 px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr
-                key={user.id}
-                className={`border-b ${user.status === "Inactive" ? "opacity-60" : "hover:bg-gray-50"}`}
-              >
-                <td className="py-3 px-4">
-                  <div>
-                    <span className="font-medium">{user.email}</span>
-                    {user.mustChangePassword && (
-                      <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">
-                        Must change password
-                      </span>
-                    )}
-                  </div>
-                </td>
-
-                <td className="py-3 px-4">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    ROLE_CLASS[user.role] ?? "bg-gray-100 text-gray-600"
-                  }`}>
-                    {user.role}
-                  </span>
-                </td>
-
-                <td className="py-3 px-4">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    user.status === "Active"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-600"
-                  }`}>
-                    {user.status}
-                  </span>
-                </td>
-
-                <td className="py-3 px-4 text-gray-500">
-                  {formatDateTime(user.lastLoginAt)}
-                </td>
-
-                <td className="py-3 px-4 text-gray-500">
-                  {formatDateTime(user.createdAt)}
-                </td>
-
-                <td className="py-3 px-4">
-                  <div className="flex gap-1 flex-wrap">
-                    <button
-                      onClick={() => handleResetPassword(user)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
-                      title="Generate a new password"
-                    >
-                      Reset Password
-                    </button>
-
-                    <button
-                      onClick={() => handleToggleStatus(user)}
-                      className={`px-2 py-1 rounded text-xs text-white ${
-                        user.status === "Active"
-                          ? "bg-orange-500 hover:bg-orange-600"
-                          : "bg-green-600 hover:bg-green-700"
-                      }`}
-                    >
-                      {user.status === "Active" ? "Deactivate" : "Reactivate"}
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(user)}
-                      className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
+      <div>
+        <div className="bg-white rounded shadow overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead>
+              <tr className="bg-gray-100 border-b text-left">
+                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Role</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Last Login</th>
+                <th className="py-3 px-4">Created</th>
+                <th className="py-3 px-4">Actions</th>
               </tr>
-            ))}
+            </thead>
+            <tbody>
+              {pager.pageItems.map(user => (
+                <tr
+                  key={user.id}
+                  className={`border-b ${user.status === "Inactive" ? "opacity-60" : "hover:bg-gray-50"}`}
+                >
+                  <td className="py-3 px-4">
+                    <div>
+                      <span className="font-medium">{user.email}</span>
+                      {user.mustChangePassword && (
+                        <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">
+                          Must change password
+                        </span>
+                      )}
+                    </div>
+                  </td>
 
-            {users.length === 0 && (
-              <tr>
-                <td colSpan={6} className="py-8 text-center text-gray-400">
-                  No user accounts yet. Click "Create Account" to add one.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  <td className="py-3 px-4">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      ROLE_CLASS[user.role] ?? "bg-gray-100 text-gray-600"
+                    }`}>
+                      {user.role}
+                    </span>
+                  </td>
+
+                  <td className="py-3 px-4">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      user.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-600"
+                    }`}>
+                      {user.status}
+                    </span>
+                  </td>
+
+                  <td className="py-3 px-4 text-gray-500">
+                    {formatDateTime(user.lastLoginAt)}
+                  </td>
+
+                  <td className="py-3 px-4 text-gray-500">
+                    {formatDateTime(user.createdAt)}
+                  </td>
+
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1 flex-wrap">
+                      <button
+                        onClick={() => handleResetPassword(user)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
+                        title="Generate a new password"
+                      >
+                        Reset Password
+                      </button>
+
+                      <button
+                        onClick={() => handleToggleStatus(user)}
+                        className={`px-2 py-1 rounded text-xs text-white ${
+                          user.status === "Active"
+                            ? "bg-orange-500 hover:bg-orange-600"
+                            : "bg-green-600 hover:bg-green-700"
+                        }`}
+                      >
+                        {user.status === "Active" ? "Deactivate" : "Reactivate"}
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(user)}
+                        className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-gray-400">
+                    No user accounts yet. Click "Create Account" to add one.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <Pagination pager={pager} />
       </div>
 
       {/* ── Create Account Modal ─────────────────────────────────── */}
       {createOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[420px] shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-xl">
             <h2 className="text-xl font-bold mb-1">Create User Account</h2>
             <p className="text-sm text-gray-500 mb-4">
               A secure password will be generated automatically. You'll see it once to share with the new user.
@@ -358,8 +366,8 @@ export default function Users() {
 
       {/* ── Credentials Modal (shown ONCE after create or reset) ──── */}
       {credModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[440px] shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-[440px] max-h-[90vh] overflow-y-auto shadow-2xl">
 
             {/* Warning header */}
             <div className="bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 mb-5">
@@ -377,11 +385,11 @@ export default function Users() {
             <div className="bg-gray-50 rounded-lg border p-4 space-y-3 font-mono text-sm mb-5">
               <div>
                 <span className="text-gray-400 text-xs block mb-0.5">Email</span>
-                <span className="font-semibold text-gray-800">{credEmail}</span>
+                <span className="font-semibold text-gray-800 break-all">{credEmail}</span>
               </div>
               <div className="border-t pt-3">
                 <span className="text-gray-400 text-xs block mb-0.5">Temporary Password</span>
-                <span className="font-bold text-lg tracking-wider text-gray-900">
+                <span className="font-bold text-lg tracking-wider text-gray-900 break-all">
                   {credPassword}
                 </span>
               </div>

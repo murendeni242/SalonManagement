@@ -1,9 +1,8 @@
-// UPDATED — field names match backend ServiceDto exactly.
-// Owner only: Create + Edit + Delete.
-// All roles: View list.
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { getUserRole } from "../auth/authUtils";
+import { usePagination } from "../hooks/usePagination";
+import Pagination from "../components/Pagination";
 
 interface Service {
   id: number;
@@ -30,6 +29,8 @@ export default function Services() {
     basePrice:       0,
     status:          "Active",
   });
+
+  const pager = usePagination(services, 10);
 
   useEffect(() => { fetchServices(); }, []);
 
@@ -97,10 +98,10 @@ export default function Services() {
     }
   };
 
-  if (loading) return <div className="p-6 text-gray-500">Loading services…</div>;
+  if (loading) return <div className="p-4 md:p-6 text-gray-500">Loading services…</div>;
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Services</h1>
         {role === "Owner" && (
@@ -113,63 +114,67 @@ export default function Services() {
         )}
       </div>
 
-      <table className="w-full bg-white rounded shadow">
-        <thead>
-          <tr className="bg-gray-100 border-b text-left">
-            <th className="py-3 px-4">Name</th>
-            <th className="py-3 px-4">Duration</th>
-            <th className="py-3 px-4">Price</th>
-            <th className="py-3 px-4">Status</th>
-            {role === "Owner" && <th className="py-3 px-4">Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {services.map(s => (
-            <tr key={s.id} className="border-b hover:bg-gray-50">
-              <td className="py-3 px-4 font-medium">{s.name}</td>
-              <td className="py-3 px-4 text-sm">{s.durationMinutes} min</td>
-              <td className="py-3 px-4 text-sm">R {s.basePrice.toFixed(2)}</td>
-              <td className="py-3 px-4">
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                  s.status === "Active"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-500"
-                }`}>
-                  {s.status}
-                </span>
-              </td>
-              {role === "Owner" && (
-                <td className="py-3 px-4 space-x-2">
-                  <button
-                    onClick={() => openEdit(s)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(s.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+      <div className="bg-white rounded shadow overflow-x-auto">
+        <table className="w-full min-w-[560px]">
+          <thead>
+            <tr className="bg-gray-100 border-b text-left">
+              <th className="py-3 px-4">Name</th>
+              <th className="py-3 px-4">Duration</th>
+              <th className="py-3 px-4">Price</th>
+              <th className="py-3 px-4">Status</th>
+              {role === "Owner" && <th className="py-3 px-4">Actions</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {pager.pageItems.map(s => (
+              <tr key={s.id} className="border-b hover:bg-gray-50">
+                <td className="py-3 px-4 font-medium">{s.name}</td>
+                <td className="py-3 px-4 text-sm">{s.durationMinutes} min</td>
+                <td className="py-3 px-4 text-sm whitespace-nowrap">R {s.basePrice.toFixed(2)}</td>
+                <td className="py-3 px-4">
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    s.status === "Active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-500"
+                  }`}>
+                    {s.status}
+                  </span>
                 </td>
-              )}
-            </tr>
-          ))}
-          {services.length === 0 && (
-            <tr>
-              <td colSpan={5} className="py-8 text-center text-gray-400 text-sm">
-                No services yet. Click "Add Service" to create one.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                {role === "Owner" && (
+                  <td className="py-3 px-4 whitespace-nowrap space-x-2">
+                    <button
+                      onClick={() => openEdit(s)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(s.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+            {services.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-gray-400 text-sm">
+                  No services yet. Click "Add Service" to create one.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <Pagination pager={pager} />
 
       {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[420px] shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-xl">
             <h2 className="text-xl font-bold mb-4">
               {editingId ? "Edit Service" : "Add Service"}
             </h2>
@@ -201,7 +206,7 @@ export default function Services() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">Duration (mins) *</label>
                   <input
