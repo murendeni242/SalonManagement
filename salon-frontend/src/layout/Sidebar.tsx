@@ -92,8 +92,8 @@ export default function Sidebar() {
     : "User";
 
   return (
-    <aside style={{
-      width: "240px", minHeight: "100vh",
+    <aside className="h-full md:min-h-screen" style={{
+      width: "240px",
       background: "#1e2a3a",
       display: "flex", flexDirection: "column", flexShrink: 0,
       borderRight: "1px solid rgba(255,255,255,0.06)",
