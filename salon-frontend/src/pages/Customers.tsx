@@ -1,11 +1,12 @@
 // Full CRUD + search + profile view
 // - List all customers with search by name or phone
 // - Add / Edit / Delete (soft delete)
-// - Click a customer → slide-in profile panel showing
-//   total visits, total spent, days since last visit, recent bookings
+// - Click a customer → profile panel (side panel on desktop, full screen on phones)
 import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
 import { getUserRole } from "../auth/authUtils";
+import { usePagination } from "../hooks/usePagination";
+import Pagination from "../components/Pagination";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -96,6 +97,10 @@ export default function Customers() {
     dateOfBirth: "",
     notes:       "",
   });
+
+  // Display list (search results or full list) + pagination
+  const displayList = searchResults ?? customers;
+  const pager = usePagination(displayList, 10);
 
   // ── Data fetching ────────────────────────────────────────────────
 
@@ -227,22 +232,18 @@ export default function Customers() {
     }
   };
 
-  // ── Display list (search results or full list) ───────────────────
-
-  const displayList = searchResults ?? customers;
-
   // ── Render ───────────────────────────────────────────────────────
 
-  if (loading) return <div className="p-6 text-gray-500">Loading customers…</div>;
+  if (loading) return <div className="p-4 md:p-6 text-gray-500">Loading customers…</div>;
 
   return (
-    <div className="flex h-[calc(100vh-0px)] overflow-hidden">
+    <div className="flex md:h-screen md:overflow-hidden">
 
       {/* ── Left panel — list ───────────────────────────────────── */}
-      <div className={`flex flex-col ${selectedId ? "w-1/2" : "w-full"} transition-all duration-200`}>
+      <div className={`flex flex-col ${selectedId ? "w-full md:w-1/2" : "w-full"} transition-all duration-200`}>
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4">
+        <div className="flex items-center justify-between p-4 md:p-6 pb-4">
           <h1 className="text-2xl font-bold">Customers</h1>
           {(role === "Owner" || role === "Reception") && (
             <button
@@ -255,14 +256,14 @@ export default function Customers() {
         </div>
 
         {/* Search bar */}
-        <div className="px-6 pb-4">
+        <div className="px-4 md:px-6 pb-4">
           <div className="relative">
             <input
               type="text"
               className="w-full border p-2 pl-9 rounded text-sm"
               placeholder="Search by name or phone number…"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={e => { setSearchQuery(e.target.value); pager.setPage(1); }}
             />
             <span className="absolute left-3 top-2.5 text-gray-400 text-sm">🔍</span>
             {searching && (
@@ -274,7 +275,7 @@ export default function Customers() {
               {searchResults.length} result{searchResults.length !== 1 ? "s" : ""} for "{searchQuery}"
               <button
                 className="ml-2 text-blue-500 hover:underline"
-                onClick={() => { setSearchQuery(""); setSearchResults(null); }}
+                onClick={() => { setSearchQuery(""); setSearchResults(null); pager.setPage(1); }}
               >
                 Clear
               </button>
@@ -283,80 +284,84 @@ export default function Customers() {
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <table className="w-full bg-white rounded shadow text-sm">
-            <thead>
-              <tr className="bg-gray-100 border-b text-left">
-                <th className="py-3 px-4">Name</th>
-                <th className="py-3 px-4">Phone</th>
-                <th className="py-3 px-4">Email</th>
-                <th className="py-3 px-4">Last Visit</th>
-                {(role === "Owner" || role === "Reception") && (
-                  <th className="py-3 px-4">Actions</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {displayList.map(c => (
-                <tr
-                  key={c.id}
-                  className={`border-b cursor-pointer transition-colors ${
-                    selectedId === c.id
-                      ? "bg-blue-50"
-                      : "hover:bg-gray-50"
-                  }`}
-                  onClick={() => setSelectedId(c.id === selectedId ? null : c.id)}
-                >
-                  <td className="py-3 px-4 font-medium">{c.fullName}</td>
-                  <td className="py-3 px-4 text-gray-600">{c.phone}</td>
-                  <td className="py-3 px-4 text-gray-500">{c.email ?? "—"}</td>
-                  <td className="py-3 px-4 text-gray-500">{formatDate(c.lastVisitAt)}</td>
+        <div className="flex-1 md:overflow-y-auto px-4 md:px-6 pb-6">
+          <div className="bg-white rounded shadow overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="bg-gray-100 border-b text-left">
+                  <th className="py-3 px-4">Name</th>
+                  <th className="py-3 px-4">Phone</th>
+                  <th className="py-3 px-4">Email</th>
+                  <th className="py-3 px-4">Last Visit</th>
                   {(role === "Owner" || role === "Reception") && (
-                    <td className="py-3 px-4" onClick={e => e.stopPropagation()}>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => openEdit(c)}
-                          className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
-                        >
-                          Edit
-                        </button>
-                        {role === "Owner" && (
-                          <button
-                            onClick={() => handleDelete(c.id)}
-                            className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    </td>
+                    <th className="py-3 px-4">Actions</th>
                   )}
                 </tr>
-              ))}
-              {displayList.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-400">
-                    {searchResults !== null
-                      ? `No customers found matching "${searchQuery}"`
-                      : "No customers yet. Click \"Add Customer\" to get started."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {pager.pageItems.map(c => (
+                  <tr
+                    key={c.id}
+                    className={`border-b cursor-pointer transition-colors ${
+                      selectedId === c.id
+                        ? "bg-blue-50"
+                        : "hover:bg-gray-50"
+                    }`}
+                    onClick={() => setSelectedId(c.id === selectedId ? null : c.id)}
+                  >
+                    <td className="py-3 px-4 font-medium">{c.fullName}</td>
+                    <td className="py-3 px-4 text-gray-600">{c.phone}</td>
+                    <td className="py-3 px-4 text-gray-500">{c.email ?? "—"}</td>
+                    <td className="py-3 px-4 text-gray-500 whitespace-nowrap">{formatDate(c.lastVisitAt)}</td>
+                    {(role === "Owner" || role === "Reception") && (
+                      <td className="py-3 px-4" onClick={e => e.stopPropagation()}>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => openEdit(c)}
+                            className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600"
+                          >
+                            Edit
+                          </button>
+                          {role === "Owner" && (
+                            <button
+                              onClick={() => handleDelete(c.id)}
+                              className="bg-red-500 text-white px-3 py-1.5 rounded text-xs hover:bg-red-600"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+                {displayList.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-gray-400">
+                      {searchResults !== null
+                        ? `No customers found matching "${searchQuery}"`
+                        : "No customers yet. Click \"Add Customer\" to get started."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination pager={pager} />
         </div>
       </div>
 
-      {/* ── Right panel — profile ───────────────────────────────── */}
+      {/* ── Right panel — profile (full screen on phones) ───────── */}
       {selectedId && (
-        <div className="w-1/2 border-l bg-white overflow-y-auto flex flex-col">
+        <div className="fixed inset-0 z-40 md:static md:z-auto w-full md:w-1/2 border-l bg-white overflow-y-auto flex flex-col">
 
           {/* Close button */}
-          <div className="flex items-center justify-between px-6 py-4 border-b">
+          <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b">
             <h2 className="text-lg font-bold">Customer Profile</h2>
             <button
               onClick={() => setSelectedId(null)}
-              className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+              className="text-gray-400 hover:text-gray-600 text-xl leading-none px-2"
             >
               ✕
             </button>
@@ -365,7 +370,7 @@ export default function Customers() {
           {profileLoading ? (
             <div className="p-6 text-gray-400">Loading profile…</div>
           ) : profile ? (
-            <div className="p-6 space-y-6">
+            <div className="p-4 md:p-6 space-y-6">
 
               {/* Personal details */}
               <div>
@@ -517,8 +522,8 @@ export default function Customers() {
 
       {/* ── Add/Edit Modal ──────────────────────────────────────── */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[460px] shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-[460px] max-h-[90vh] overflow-y-auto shadow-xl">
             <h2 className="text-xl font-bold mb-4">
               {editingId ? "Edit Customer" : "Add Customer"}
             </h2>
@@ -530,7 +535,7 @@ export default function Customers() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">First Name *</label>
                   <input
@@ -628,9 +633,9 @@ export default function Customers() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between">
+    <div className="flex justify-between gap-4">
       <span className="text-gray-500">{label}</span>
-      <span className="text-gray-800 font-medium">{value}</span>
+      <span className="text-gray-800 font-medium text-right">{value}</span>
     </div>
   );
 }

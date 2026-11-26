@@ -119,10 +119,10 @@ export default function CommissionEarnings() {
 
   // ── Render ───────────────────────────────────────────────────────
 
-  if (loading) return <div className="p-6 text-gray-500">Loading earnings…</div>;
+  if (loading) return <div className="p-4 md:p-6 text-gray-500">Loading earnings…</div>;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
 
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ export default function CommissionEarnings() {
       </div>
 
       {/* ── Date filter ────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 bg-white border rounded px-4 py-3 w-fit">
+      <div className="flex flex-wrap items-center gap-3 bg-white border rounded px-4 py-3 w-fit max-w-full">
         <span className="text-sm text-gray-500 font-medium">Period:</span>
         <input
           type="date"
@@ -175,8 +175,8 @@ export default function CommissionEarnings() {
       </div>
 
       {/* ── Per-staff earnings table ────────────────────────────── */}
-      <div className="bg-white rounded shadow overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded shadow overflow-x-auto">
+        <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="bg-gray-100 border-b text-left">
               <th className="py-3 px-4">Staff Member</th>

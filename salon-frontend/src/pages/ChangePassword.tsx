@@ -106,7 +106,7 @@ export default function ChangePassword() {
               className="w-full border p-2 rounded text-sm"
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
-              autoComplete="new-password"
+              autoComplete="new-full max-w-[460px]assword"
               required
             />
             {/* Simple strength indicator */}
@@ -119,7 +119,7 @@ export default function ChangePassword() {
                       passwordStrength(newPassword) >= level
                         ? level <= 1 ? "bg-red-400"
                           : level <= 2 ? "bg-orange-400"
-                          : level <= 3 ? "bg-yellow-400"
+                          : level <= 3 ? "bg-yellow-full max-w-[460px]00"
                           : "bg-green-500"
                         : "bg-gray-200"
                     }`}
@@ -141,7 +141,7 @@ export default function ChangePassword() {
               className="w-full border p-2 rounded text-sm"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
+              autoComplete="new-full max-w-[460px]assword"
               required
             />
             {confirmPassword && newPassword !== confirmPassword && (

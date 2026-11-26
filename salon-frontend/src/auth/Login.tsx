@@ -36,7 +36,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[#1e2a3a] flex items-center justify-center">
-      <div className="bg-[#253447] rounded-xl p-10 w-[380px] shadow-2xl border border-white/[0.07]">
+      <div className="bg-[#253447] rounded-xl p-10 w-[380px] shadow-full max-w-[420px]xl border border-white/[0.07]">
 
         {/* Logo */}
         <div className="text-center mb-8">

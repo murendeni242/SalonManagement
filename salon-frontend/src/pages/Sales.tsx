@@ -1,6 +1,6 @@
 // Features:
 // - Revenue summary cards (total, refunded, net, by payment method)
-// - Sales table with date filter (from/to)
+// - Sales table with date filter (from/to) and pagination
 // - Record payment modal — links to a confirmed booking
 // - Refund modal — partial or full refund
 // - Void sale (Owner only)
@@ -8,6 +8,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import api from "../api/axios";
+import { usePagination } from "../hooks/usePagination";
+import Pagination from "../components/Pagination";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -121,6 +123,9 @@ export default function Sales() {
     refundAmount: 0,
     notes:        "",
   });
+
+  // Pagination (must stay above the early "if (loading) return")
+  const pager = usePagination(sales, 10);
 
   // ── Data fetching ────────────────────────────────────────────────
 
@@ -245,10 +250,10 @@ export default function Sales() {
 
   // ── Render ───────────────────────────────────────────────────────
 
-  if (loading) return <div className="p-6 text-gray-500">Loading sales…</div>;
+  if (loading) return <div className="p-4 md:p-6 text-gray-500">Loading sales…</div>;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
 
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
@@ -262,20 +267,20 @@ export default function Sales() {
       </div>
 
       {/* ── Date filter ────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 bg-white border rounded px-4 py-3 w-fit">
+      <div className="flex flex-wrap items-center gap-3 bg-white border rounded px-4 py-3 w-fit max-w-full">
         <span className="text-sm text-gray-500 font-medium">Period:</span>
         <input
           type="date"
           className="border p-1.5 rounded text-sm"
           value={fromDate}
-          onChange={e => setFromDate(e.target.value)}
+          onChange={e => { setFromDate(e.target.value); pager.setPage(1); }}
         />
         <span className="text-gray-400 text-sm">to</span>
         <input
           type="date"
           className="border p-1.5 rounded text-sm"
           value={toDate}
-          onChange={e => setToDate(e.target.value)}
+          onChange={e => { setToDate(e.target.value); pager.setPage(1); }}
         />
       </div>
 
@@ -326,99 +331,103 @@ export default function Sales() {
       )}
 
       {/* ── Sales table ────────────────────────────────────────── */}
-      <div className="bg-white rounded shadow overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-100 border-b text-left">
-              <th className="py-3 px-4">Date & Time</th>
-              <th className="py-3 px-4">Booking</th>
-              <th className="py-3 px-4">Amount</th>
-              <th className="py-3 px-4">Method</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Notes</th>
-              <th className="py-3 px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sales.map(sale => (
-              <tr
-                key={sale.id}
-                className={`border-b hover:bg-gray-50 ${
-                  sale.originalSaleId ? "opacity-70" : ""
-                }`}
-              >
-                <td className="py-3 px-4 text-gray-600">
-                  {formatDateTime(sale.paidAt)}
-                </td>
-                <td className="py-3 px-4">
-                  {sale.originalSaleId ? (
-                    <span className="text-orange-600 text-xs font-medium">
-                      ↩ Refund of Sale #{sale.originalSaleId}
-                    </span>
-                  ) : (
-                    <span className="text-gray-700">
-                      {bookingLabel(sale.bookingId)}
-                    </span>
-                  )}
-                </td>
-                <td className={`py-3 px-4 font-semibold ${
-                  sale.amountPaid < 0 ? "text-red-600" : "text-gray-800"
-                }`}>
-                  {formatCurrency(sale.amountPaid)}
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-2 h-2 rounded-full ${METHOD_COLORS[sale.paymentMethod] ?? "bg-gray-400"}`} />
-                    {sale.paymentMethod}
-                  </div>
-                </td>
-                <td className="py-3 px-4">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    STATUS_CLASS[sale.status] ?? "bg-gray-100 text-gray-500"
-                  }`}>
-                    {sale.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4 text-gray-500 text-xs max-w-[160px] truncate">
-                  {sale.notes ?? "—"}
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex gap-1">
-                    {sale.status === "Paid" && !sale.originalSaleId && (
-                      <>
-                        <button
-                          onClick={() => openRefundModal(sale)}
-                          className="bg-orange-500 text-white px-2 py-1 rounded text-xs hover:bg-orange-600"
-                        >
-                          Refund
-                        </button>
-                        <button
-                          onClick={() => handleVoid(sale)}
-                          className="bg-gray-400 text-white px-2 py-1 rounded text-xs hover:bg-gray-500"
-                        >
-                          Void
-                        </button>
-                      </>
+      <div>
+        <div className="bg-white rounded shadow overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead>
+              <tr className="bg-gray-100 border-b text-left">
+                <th className="py-3 px-4">Date & Time</th>
+                <th className="py-3 px-4">Booking</th>
+                <th className="py-3 px-4">Amount</th>
+                <th className="py-3 px-4">Method</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Notes</th>
+                <th className="py-3 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pager.pageItems.map(sale => (
+                <tr
+                  key={sale.id}
+                  className={`border-b hover:bg-gray-50 ${
+                    sale.originalSaleId ? "opacity-70" : ""
+                  }`}
+                >
+                  <td className="py-3 px-4 text-gray-600">
+                    {formatDateTime(sale.paidAt)}
+                  </td>
+                  <td className="py-3 px-4">
+                    {sale.originalSaleId ? (
+                      <span className="text-orange-600 text-xs font-medium">
+                        ↩ Refund of Sale #{sale.originalSaleId}
+                      </span>
+                    ) : (
+                      <span className="text-gray-700">
+                        {bookingLabel(sale.bookingId)}
+                      </span>
                     )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {sales.length === 0 && (
-              <tr>
-                <td colSpan={7} className="py-8 text-center text-gray-400">
-                  No sales in this period. Change the date range or record a payment.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  </td>
+                  <td className={`py-3 px-4 font-semibold whitespace-nowrap ${
+                    sale.amountPaid < 0 ? "text-red-600" : "text-gray-800"
+                  }`}>
+                    {formatCurrency(sale.amountPaid)}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-2 h-2 rounded-full ${METHOD_COLORS[sale.paymentMethod] ?? "bg-gray-400"}`} />
+                      {sale.paymentMethod}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      STATUS_CLASS[sale.status] ?? "bg-gray-100 text-gray-500"
+                    }`}>
+                      {sale.status}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-gray-500 text-xs max-w-[160px] truncate">
+                    {sale.notes ?? "—"}
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1">
+                      {sale.status === "Paid" && !sale.originalSaleId && (
+                        <>
+                          <button
+                            onClick={() => openRefundModal(sale)}
+                            className="bg-orange-500 text-white px-2 py-1 rounded text-xs hover:bg-orange-600"
+                          >
+                            Refund
+                          </button>
+                          <button
+                            onClick={() => handleVoid(sale)}
+                            className="bg-gray-400 text-white px-2 py-1 rounded text-xs hover:bg-gray-500"
+                          >
+                            Void
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {sales.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-gray-400">
+                    No sales in this period. Change the date range or record a payment.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <Pagination pager={pager} />
       </div>
 
       {/* ── Record Payment Modal ────────────────────────────────── */}
       {payModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[460px] shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-[460px] max-h-[90vh] overflow-y-auto shadow-xl">
             <h2 className="text-xl font-bold mb-4">Record Payment</h2>
 
             {payError && (
@@ -486,7 +495,7 @@ export default function Sales() {
                   <label className="block text-sm font-medium mb-1">
                     Payment Method *
                   </label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {PAYMENT_METHODS.map(method => (
                       <button
                         key={method}
@@ -539,8 +548,8 @@ export default function Sales() {
 
       {/* ── Refund Modal ────────────────────────────────────────── */}
       {refundModalOpen && refundSaleId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[400px] shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-[400px] max-h-[90vh] overflow-y-auto shadow-xl">
             <h2 className="text-xl font-bold mb-1">Issue Refund</h2>
             <p className="text-sm text-gray-500 mb-4">
               Sale #{refundSaleId} — {bookingLabel(

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+import { usePagination } from "../hooks/usePagination";
+import Pagination from "../components/Pagination";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -76,6 +78,8 @@ export default function Staff() {
     role:      "Stylist" as SalonRole,
     status:    "Active",
   });
+
+  const pager = usePagination(staff, 10);
 
   useEffect(() => { fetchStaff(); }, []);
 
@@ -220,12 +224,12 @@ export default function Staff() {
     }
   };
 
-  if (loading) return <div className="p-6 text-gray-500">Loading staff…</div>;
+  if (loading) return <div className="p-4 md:p-6 text-gray-500">Loading staff…</div>;
 
   // ── Render ──────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 flex gap-6">
+    <div className="p-4 md:p-6 flex flex-col md:flex-row gap-6">
 
       {/* ── Left: staff table ───────────────────────────────────── */}
       <div className={hoursStaff ? "flex-1 min-w-0" : "w-full"}>
@@ -239,80 +243,84 @@ export default function Staff() {
           </button>
         </div>
 
-        <table className="w-full bg-white rounded shadow">
-          <thead>
-            <tr className="bg-gray-100 border-b text-left">
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Phone</th>
-              <th className="py-3 px-4">Job Role</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {staff.map(member => (
-              <tr
-                key={member.id}
-                className={`border-b hover:bg-gray-50 ${
-                  hoursStaff?.id === member.id ? "bg-teal-50" : ""
-                }`}
-              >
-                <td className="py-3 px-4 font-medium">{member.fullName}</td>
-                <td className="py-3 px-4 text-sm text-gray-600">{member.phone}</td>
-                <td className="py-3 px-4 text-sm">{member.role}</td>
-                <td className="py-3 px-4">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    member.status === "Active"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-500"
-                  }`}>
-                    {member.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4 space-x-2">
-                  <button
-                    onClick={() => openEdit(member)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() =>
-                      hoursStaff?.id === member.id
-                        ? closeWorkingHours()
-                        : openWorkingHours(member)
-                    }
-                    className={`px-3 py-1 rounded text-sm ${
-                      hoursStaff?.id === member.id
-                        ? "bg-teal-600 text-white hover:bg-teal-700"
-                        : "bg-teal-500 text-white hover:bg-teal-600"
-                    }`}
-                  >
-                    {hoursStaff?.id === member.id ? "Close Hours" : "Hours"}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(member.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="bg-white rounded shadow overflow-x-auto">
+          <table className="w-full min-w-[640px]">
+            <thead>
+              <tr className="bg-gray-100 border-b text-left">
+                <th className="py-3 px-4">Name</th>
+                <th className="py-3 px-4">Phone</th>
+                <th className="py-3 px-4">Job Role</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Actions</th>
               </tr>
-            ))}
-            {staff.length === 0 && (
-              <tr>
-                <td colSpan={5} className="py-8 text-center text-gray-400 text-sm">
-                  No staff members yet. Click "Add Staff" to get started.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pager.pageItems.map(member => (
+                <tr
+                  key={member.id}
+                  className={`border-b hover:bg-gray-50 ${
+                    hoursStaff?.id === member.id ? "bg-teal-50" : ""
+                  }`}
+                >
+                  <td className="py-3 px-4 font-medium">{member.fullName}</td>
+                  <td className="py-3 px-4 text-sm text-gray-600">{member.phone}</td>
+                  <td className="py-3 px-4 text-sm">{member.role}</td>
+                  <td className="py-3 px-4">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      member.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-500"
+                    }`}>
+                      {member.status}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 whitespace-nowrap space-x-2">
+                    <button
+                      onClick={() => openEdit(member)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() =>
+                        hoursStaff?.id === member.id
+                          ? closeWorkingHours()
+                          : openWorkingHours(member)
+                      }
+                      className={`px-3 py-1 rounded text-sm ${
+                        hoursStaff?.id === member.id
+                          ? "bg-teal-600 text-white hover:bg-teal-700"
+                          : "bg-teal-500 text-white hover:bg-teal-600"
+                      }`}
+                    >
+                      {hoursStaff?.id === member.id ? "Close Hours" : "Hours"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(member.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {staff.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-400 text-sm">
+                    No staff members yet. Click "Add Staff" to get started.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <Pagination pager={pager} />
       </div>
 
-      {/* ── Right: working hours panel ──────────────────────────── */}
+      {/* ── Right: working hours panel (full-screen sheet on phones) ── */}
       {hoursStaff && (
-        <div className="w-[400px] flex-shrink-0">
+        <div className="fixed inset-0 z-40 overflow-y-auto bg-gray-100 p-4 md:static md:z-auto md:p-0 md:w-[400px] md:flex-shrink-0">
           <div className="bg-white rounded shadow">
 
             {/* Panel header */}
@@ -323,7 +331,7 @@ export default function Staff() {
               </div>
               <button
                 onClick={closeWorkingHours}
-                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none px-2"
               >
                 ×
               </button>
@@ -456,8 +464,8 @@ export default function Staff() {
 
       {/* ── Add / Edit staff modal ──────────────────────────────── */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-[420px] shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-xl">
             <h2 className="text-xl font-bold mb-4">
               {editingId ? "Edit Staff Member" : "Add Staff Member"}
             </h2>
@@ -469,7 +477,7 @@ export default function Staff() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">First Name *</label>
                   <input
